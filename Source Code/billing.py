@@ -212,7 +212,7 @@ class BillClass:
         btn_generate.place(x=246,y=80,width=160,height=50)
 
         ######################  Footer =======
-        footer = Label(self.root, text="Inventory Management System | Developed by  | © 2025 All Rights Reserved", font=("times new roman", 11), bg="#010c48", fg="white",bd=0, cursor="hand2")
+        footer = Label(self.root, text="Inventory Management System | Developed by Rajinder | © 2025 All Rights Reserved", font=("times new roman", 11), bg="#010c48", fg="white",bd=0, cursor="hand2")
         footer.pack(side=BOTTOM,fill=X)
 
         self.show()
@@ -450,12 +450,6 @@ Bill No.{str(self.invoice)}\t\t\t Date: {str(time.strftime("%m/%d/%Y"))}
         date_=time.strftime("%m-%d-%Y")
         self.lbl_clock.config(text=f"Welcome to Inventory Management System\t\t Date: {str(date_)}\t\t Time: {str(time_)}")
         self.lbl_clock.after(200,self.update_date_time)
-
-
-
-
-
-    
 
 
 
