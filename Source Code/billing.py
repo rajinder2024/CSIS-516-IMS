@@ -3,6 +3,9 @@ from PIL import Image,ImageTk
 from tkinter import ttk,messagebox
 import sqlite3
 import time
+import os
+import tempfile
+
 class BillClass:
     def __init__(self, root):  
         self.root = root
@@ -10,6 +13,9 @@ class BillClass:
         self.root.title("Inventory Management System")  # Set a window title
         self.root.config(bg="white")
         self.cart_list=[]
+
+        self.chk_print=0
+
         #======title========
         self.icon_title = PhotoImage(file="images/logo1.png")
 
@@ -202,7 +208,7 @@ class BillClass:
         self.lbl_net_pay=Label(billMenuFrame,text="NetPay\n[0]", font=("goudy old style", 15, "bold"),bg="#607d8b", fg="white")
         self.lbl_net_pay.place(x=246,y=5,width=160,height=70)
         
-        btn_print=Button(billMenuFrame,text="Print",cursor="hand2",font=("goudy old style", 15, "bold"),bg="lightgreen", fg="white")
+        btn_print=Button(billMenuFrame,text="Print", command=self.print_bill,cursor="hand2",font=("goudy old style", 15, "bold"),bg="lightgreen", fg="white")
         btn_print.place(x=2,y=80,width=120,height=50)
 
         btn_clear_all=Button(billMenuFrame,text="clear All",command=self.clear_all,cursor="hand2", font=("goudy old style", 15, "bold"),bg="gray", fg="white")
@@ -363,10 +369,13 @@ class BillClass:
             #### bill bottom
             self.bill_bottom()
 
-            fp=open(f'bill/+ {str(self.invoice)}.txt','w')
+            #
+            # fp=open(f'bill/+ {str(self.invoice)}.txt','w')
+            fp = open(f'bill/{str(self.invoice)}.txt', 'w')
             fp.write(self.txt_bill_area.get('1.0',END))
             fp.close()
             messagebox.showinfo('Saved',"Bill has been generated/Save in Backend",parent=self.root)
+            self.chk_print=1
            
 
     def bill_top(self):
@@ -451,7 +460,39 @@ Bill No.{str(self.invoice)}\t\t\t Date: {str(time.strftime("%m/%d/%Y"))}
         self.lbl_clock.config(text=f"Welcome to Inventory Management System\t\t Date: {str(date_)}\t\t Time: {str(time_)}")
         self.lbl_clock.after(200,self.update_date_time)
 
+    def print_bill(self):
+        """Prints the generated bill or shows an error if not generated."""
+    
+        print(f"chk_print value: {self.chk_print}")  # For debugging
 
+        if self.chk_print == 1:
+            try:
+                # Fetch the latest bill
+                bill_path = f'bill/{str(self.invoice)}.txt'
+
+                # Check if bill exists
+                if not os.path.exists(bill_path):
+                    messagebox.showerror("Error", "Bill file not found!", parent=self.root)
+                    return
+
+                # Create a temporary file for printing
+                with open(bill_path, "r") as bill_file:
+                    bill_content = bill_file.read()
+
+                # Use tempfile to create a temporary file for printing
+                temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.txt')
+                temp_file.write(bill_content.encode('utf-8'))  
+                temp_file.close()
+
+                # Print the bill
+                os.startfile(temp_file.name, "print")
+                messagebox.showinfo("Print", "Please wait while printing...", parent=self.root)
+
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to print the bill: {e}", parent=self.root)
+
+        else:
+            messagebox.showerror('Print', "Please generate bill to print the receipt", parent=self.root)
 
 
 
