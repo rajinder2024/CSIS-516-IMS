@@ -33,7 +33,7 @@ class Login_System:
         hr= Label(login_frame,bg="lightgray").place(x=50,y=370,height=2,width=250)
         or_= Label(login_frame,text="OR",bg="white",fg="lightgray",font=("Times new roman",15,"bold")).place(x=150,y=355)
 
-        btn_forget= Button(login_frame,text="Forget Password", font=("times new roman",13),bg="white",fg="#00759E",bd=0,activebackground="white",activeforeground="#00759E").place(x=100,y=390)
+        btn_forget= Button(login_frame,text="Forget Password",command=self.forget_window, font=("times new roman",13),bg="white",fg="#00759E",bd=0,activebackground="white",activeforeground="#00759E").place(x=100,y=390)
 
         ########## frame2
         register_frame= Frame(self.root,bd=2,relief=RIDGE,bg="white")
@@ -53,12 +53,16 @@ class Login_System:
     ########## All Functions
     #    
     def animate(self):
-        self.im=self.im1
-        self.im1=self.im2
-        self.im2=self.im3
-        self.im3=self.im
-        self.lbl_change_image.config(image=self.im)
-        self.lbl_change_image.after(2000,self.animate)
+        try:
+            self.im = self.im1
+            self.im1 = self.im2
+            self.im2 = self.im3
+            self.im3 = self.im
+            self.lbl_change_image.config(image=self.im)
+            self.lbl_change_image.after(2000, self.animate)
+        except:
+            pass 
+
 
 
     def login(self):
@@ -81,13 +85,53 @@ class Login_System:
                     else:
                         self.root.destroy()
                         subprocess.Popen(["python", "Source Code/billing.py"])
-
                         
        except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
 
-    def forget_window():
-        pass
+    def forget_window(self):
+        con=sqlite3.connect(database=r'ims.db')
+        cur=con.cursor()
+        try:
+            if self.employee_id.get()=="":
+                messagebox.showerror('Error',"Employee ID must be required",parent=self.root)
+            else:
+                cur.execute("select email from employee where eid=? ",(self.employee_id.get(),))
+                email=cur.fetchone()
+                if email== None:
+                     messagebox.showerror('Error', "Invalid Employee ID, try again", parent=self.root)
+                else:
+                    ######### forget window
+                    self.var_otp=StringVar()
+                    self.var_new_pass =StringVar()
+                    self.var_conf_pass=StringVar()
+                    ## call send email function
+                    self.forget_win=Toplevel(self.root)
+                    self.forget_win.title('RESET PASSWORD')
+                    self.forget_win.geometry('400*350+500+100')
+                    self.forget_win.focus_force()
+
+                    title=Label(self.forget_win,text="Reset Password ",font=('goudy old style',15,'bold'),bg='#3f51b5',fg="white").pack(side=TOP,fill=X)
+                    lbl_reset=Label(self.forget_win,text="Enter OTP sent on Register Email",font=("times new roman",15)).place(x=20,y=60)
+                    txt_reset=Entry(self.forget_win,textvariable=self.var_otp,font=("times new roman",15),bg="lightyellow").place(x=20,y=100,height=30,width=250)
+                    self.btn_reset=Button(self.forget_win,text="SUBMIT",font=("times new roman",15),bg="lightblue")
+                    self.btn_reset.place(x=280,y=100,height=30,width=100)
+
+               
+                    lbl_new_pass=Label(self.forget_win,text="New Password",font=("times new roman",15)).place(x=20,y=160)
+                    txt_new_pass=Entry(self.forget_win,textvariable=self.var_new_pass,font=("times new roman",15),bg="lightyellow").place(x=20,y=190,height=30,width=250)
+
+                    lbl_c_pass=Label(self.forget_win,text="Confirm Password",font=("times new roman",15)).place(x=20,y=225)
+                    txt_c_pass=Entry(self.forget_win,textvariable=self.var_conf_pass,font=("times new roman",15),bg="lightyellow").place(x=20,y=255,height=30,width=250)
+
+                    self.btn_update=Button(self.forget_win,text="UPDATE",state='disabled',font=("times new roman",15),bg="lightblue")
+                    self.btn_reset.place(x=150,y=300,height=30,width=100)
+
+                    
+
+        except Exception as ex:
+            messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
+
         
 
   
