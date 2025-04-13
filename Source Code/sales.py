@@ -2,6 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 from tkinter import ttk, messagebox
 import sqlite3
+from activity_logger import ActivityLogger
 import os
 class salesClass:
     def __init__(self, root):  
@@ -10,6 +11,8 @@ class salesClass:
         self.root.title("Inventory Management System")  # Set a window title
         self.root.config(bg="white")
         self.root.focus_force()
+        # Add current user variable
+        self.current_user_id = None
         ##### variables
         self.bill_list=[]
         self.var_invoice=StringVar()

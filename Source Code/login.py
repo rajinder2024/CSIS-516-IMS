@@ -79,8 +79,11 @@ class Login_System:
                 else:
                     if user[0]=="Admin":
                         self.root.destroy()
-                        subprocess.Popen(["python", "Source Code/dashboard.py"])
-
+                        try:
+                            subprocess.Popen([r".venv\Scripts\python.exe", r"Source Code\dashboard.py"])
+                        except Exception as e:
+                            messagebox.showerror("Error", f"Failed to launch dashboard: {str(e)}")
+                                                                        
                         #os.system("python dashboard.py")
                     else:
                         self.root.destroy()
