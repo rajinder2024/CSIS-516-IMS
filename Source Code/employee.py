@@ -2,6 +2,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 from tkinter import ttk, messagebox
 import sqlite3
+
 class employeeClass:
     def __init__(self, root):  
         self.root = root
@@ -10,11 +11,12 @@ class employeeClass:
         self.root.config(bg="white")
         self.root.focus_force()
         #====================
+        # Add current user variable
+        self.current_user_id = None
         ######  All Variable ######
         self.var_searchby=StringVar()
         self.var_searchtxt=StringVar()
     
-
         self.var_emp_id=StringVar()
         self.var_gender=StringVar()
         self.var_contact=StringVar()
@@ -69,7 +71,6 @@ class employeeClass:
 
         txt_email = Entry(self.root,textvariable=self.var_email,font=("goudy old style",15),bg="lightyellow").place(x=150,y=230,width=180)
         txt_pass= Entry(self.root,textvariable=self.var_pass,font=("goudy old style",15),bg="lightyellow").place(x=500,y=230,width=180)
-        #txt_utype= Entry(self.root,textvariable=self.var_utype,font=("goudy old style",15),bg="lightyellow").place(x=850,y=230,width=180)
         cmd_utype = ttk.Combobox(self.root,textvariable=self.var_utype,values=("Admin","Employee"),state='readonly',justify=CENTER, font=("goudy old style", 15))
         cmd_utype .place(x=850,y=230, width=180)
         cmd_utype.current(0)
@@ -102,7 +103,6 @@ class employeeClass:
         scrollx.config(command=self.EmployeeTable.xview)
         scrolly.config(command=self.EmployeeTable.yview)
 
-
         self.EmployeeTable.heading("eid",text="EMP ID")
         self.EmployeeTable.heading("name",text="Name")
         self.EmployeeTable.heading("email",text="Email")
@@ -132,6 +132,10 @@ class employeeClass:
         self.EmployeeTable.bind("<ButtonRelease-1>",self.get_data)  #event
         self.show()
 #====================================================================================
+    def set_current_user(self, user_id):
+        """Set the current logged-in user ID"""
+        self.current_user_id = user_id
+
     def add(self):
         con=sqlite3.connect(database=r'ims.db')
         cur=con.cursor()
@@ -227,7 +231,6 @@ class employeeClass:
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
                      
-################### Delete
     def delete(self):
         con=sqlite3.connect(database=r'ims.db')
         cur=con.cursor()
@@ -235,9 +238,9 @@ class employeeClass:
             if self.var_emp_id.get()=="":
                 messagebox.showerror("Error", "Employee ID must be required",parent=self.root)
             else:
-                cur.execute("Select * from employee where eid=?",(self.var_emp_id.get(),))
+                cur.execute("SELECT name FROM employee WHERE eid=?",(self.var_emp_id.get(),))
                 row=cur.fetchone()
-                if row== None:
+                if row == None:
                     messagebox.showerror("Error","Invalid Employee ID",parent=self.root)
                 else:
                     op=messagebox.askyesno("Confirm","Do you really want to delete?",parent=self.root)

@@ -3,8 +3,10 @@ from PIL import Image,ImageTk
 from tkinter import ttk,messagebox
 import sqlite3
 import time
+import datetime
 import os
 import tempfile
+import subprocess
 
 class BillClass:
     def __init__(self, root):  
@@ -30,7 +32,7 @@ class BillClass:
 
         #===========button_logout=========
         btn_logout= Button(self.root,
-                           text="Logout", font=("times new roman",15,"bold"),
+                           text="Logout",command=self.logout,font=("times new roman",15,"bold"),
                            bg="red", cursor="hand2").place(x=1150,y=10,height=50, width =150)
         #========Label_clock=============
         self.lbl_clock = Label(
@@ -356,7 +358,7 @@ class BillClass:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
 
  #################### Generate bill
-    def generate_bill(self):
+    '''def generate_bill(self):
         if self.var_cname.get()==''or self.var_contact.get()=='':
             messagebox.showerror("Error",f"Customer Details are required",parent=self.root)
         elif len(self.cart_list)==0:
@@ -376,7 +378,102 @@ class BillClass:
             fp.close()
             messagebox.showinfo('Saved',"Bill has been generated/Save in Backend",parent=self.root)
             self.chk_print=1
-           
+           '''
+    # Add this at the top with other imports
+
+    def generate_bill(self):
+        if self.var_cname.get()==''or self.var_contact.get()=='':
+            messagebox.showerror("Error",f"Customer Details are required",parent=self.root)
+        elif len(self.cart_list)==0:
+             messagebox.showerror("Error",f"Please Add product to the Cart!!",parent=self.root)
+        else:
+            ##### bill top
+            self.bill_top()
+            #### bill middle
+            self.bill_middle()
+            #### bill bottom
+            self.bill_bottom()
+
+            # Save to database
+            con = sqlite3.connect(database=r'ims.db')
+            cur = con.cursor()
+            
+            try:
+                # Get current date and time
+                current_date = datetime.datetime.now().strftime("%Y-%m-%d")
+                current_time = datetime.datetime.now().strftime("%H:%M:%S")
+                
+                # Insert into sales table
+                cur.execute("""
+                INSERT INTO sales (invoice, date, time, customer_name, customer_contact, 
+                                 subtotal, discount, total)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    self.invoice,
+                    current_date,
+                    current_time,
+                    self.var_cname.get(),
+                    self.var_contact.get(),
+                    self.bill_amnt,
+                    self.discount,
+                    self.net_pay
+                ))
+                
+                # Insert items into sales_items table
+                for item in self.cart_list:
+                    # Get product category
+                    cur.execute("SELECT Category FROM product WHERE pid=?", (item[0],))
+                    category_row = cur.fetchone()
+                    category = category_row[0] if category_row else "Unknown"
+                    
+                    cur.execute("""
+                    INSERT INTO sales_items (invoice, product_id, product_name, category,
+                                           quantity, price, total)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (
+                        self.invoice,
+                        item[0],  # pid
+                        item[1],  # name
+                        category,
+                        item[3],  # qty
+                        item[2],  # price
+                        float(item[2]) * int(item[3])  # total
+                    ))
+                
+                # Update daily summary
+                cur.execute("""
+                INSERT OR REPLACE INTO daily_sales_summary 
+                (date, total_sales, total_discount, total_items_sold, num_transactions)
+                VALUES (?, 
+                        COALESCE((SELECT total_sales FROM daily_sales_summary WHERE date=?) + ?, ?),
+                        COALESCE((SELECT total_discount FROM daily_sales_summary WHERE date=?) + ?, ?),
+                        COALESCE((SELECT total_items_sold FROM daily_sales_summary WHERE date=?) + ?, ?),
+                        COALESCE((SELECT num_transactions FROM daily_sales_summary WHERE date=?) + 1, 1)
+                )
+                """, (
+                    current_date,  # date
+                    current_date, self.net_pay, self.net_pay,  # total_sales
+                    current_date, self.discount, self.discount,  # total_discount
+                    current_date, sum(int(item[3]) for item in self.cart_list), 
+                    sum(int(item[3]) for item in self.cart_list),  # total_items_sold
+                    current_date  # num_transactions
+                ))
+                
+                con.commit()
+                
+                # Save bill to file (keep your existing code)
+                fp = open(f'bill/{str(self.invoice)}.txt', 'w')
+                fp.write(self.txt_bill_area.get('1.0',END))
+                fp.close()
+                messagebox.showinfo('Saved',"Bill has been generated/Saved",parent=self.root)
+                self.chk_print=1
+                
+            except Exception as ex:
+                messagebox.showerror("Error", f"Database error: {str(ex)}", parent=self.root)
+                con.rollback()
+            finally:
+                con.close()
+
 
     def bill_top(self):
         self.invoice=int(time.strftime("%H%M%S"))+int(time.strftime("%m%d%Y"))
@@ -493,6 +590,10 @@ Bill No.{str(self.invoice)}\t\t\t Date: {str(time.strftime("%m/%d/%Y"))}
 
         else:
             messagebox.showerror('Print', "Please generate bill to print the receipt", parent=self.root)
+    def logout(self):
+    # Close current window and re-open the login screen
+        self.root.destroy()
+        subprocess.Popen(["python", "Source Code/login.py"])
 
 
 

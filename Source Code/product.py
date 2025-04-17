@@ -1,6 +1,5 @@
 from tkinter import *
 from PIL import Image, ImageTk
-from activity_logger import ActivityLogger
 from tkinter import ttk, messagebox
 import sqlite3
 class productClass:
@@ -11,7 +10,6 @@ class productClass:
         self.root.config(bg="white")
         self.root.focus_force()
         #============================
-        self.current_user_id = None 
         ####### Variable
         self.var_searchby=StringVar()
         self.var_searchtxt=StringVar()
@@ -140,9 +138,6 @@ class productClass:
         except Exception as ex:
             messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
 
-    def set_current_user(self, user_id):
-        """Set the current logged-in user ID for activity logging"""
-        self.current_user_id = user_id
     ########## ADD
     def add(self):
         con=sqlite3.connect(database=r'ims.db')
@@ -165,20 +160,6 @@ class productClass:
                         self.var_status.get(),
                     ))
                     con.commit()
-                    ### log activity
-                    ActivityLogger.log_activity(
-                        activity=f"Added new product: {self.var_name.get()}",
-                        user_id=self.current_user_id,
-                        module="products",
-                        details={
-                            "name": self.var_name.get(),
-                            "category": self.var_cat.get(),
-                            "supplier": self.var_sup.get(),
-                            "price": self.var_price.get(),
-                            "quantity": self.var_qty.get(),
-                            "status": self.var_status.get()
-                        }
-                    )
                     messagebox.showinfo("Success","Product  Addedd successfully",parent=self.root)
                     self.show()
         except Exception as ex:
@@ -219,9 +200,6 @@ class productClass:
             if self.var_pid.get()=="":
                 messagebox.showerror("Error", "Please select product from list",parent=self.root)
             else:
-                # First get current product details before updating
-                cur.execute("SELECT name, Category, Supplier, price, qty, status FROM product WHERE pid=?",(self.var_pid.get(),))
-                old_data = cur.fetchone()
                 cur.execute("Select * from product where pid=?",(self.var_pid.get(),))
                 row=cur.fetchone()
                 if row == None:
@@ -237,23 +215,6 @@ class productClass:
                         self.var_pid.get()
                     ))
                     con.commit()
-                     # Log the activity after successful update
-                    ActivityLogger.log_activity(
-                        activity=f"Updated product: {self.var_name.get()}",
-                        user_id=self.current_user_id,
-                        module="products",
-                        details={
-                            "pid": self.var_pid.get(),
-                            "changes": {
-                                "name": f"{old_data[0]} → {self.var_name.get()}",
-                                "category": f"{old_data[1]} → {self.var_cat.get()}",
-                                "supplier": f"{old_data[2]} → {self.var_sup.get()}",
-                                "price": f"{old_data[3]} → {self.var_price.get()}",
-                                "quantity": f"{old_data[4]} → {self.var_qty.get()}",
-                                "status": f"{old_data[5]} → {self.var_status.get()}"
-                            }
-                        }
-                    )
                     messagebox.showinfo("Success","Product Updated successfully",parent=self.root)
                     self.show()
         except Exception as ex:
@@ -267,37 +228,7 @@ class productClass:
             if self.var_pid.get()=="":
                 messagebox.showerror("Error", "Select product from list",parent=self.root)
             else:
-                cur.execute("SELECT name, Category, Supplier, price, qty FROM product WHERE pid=?",(self.var_pid.get(),))
-                prod_data = cur.fetchone()
-                
-                if prod_data== None:
-                    messagebox.showerror("Error","Invalid",parent=self.root)
-                else:
-                    op=messagebox.askyesno("Confirm","Do you really want to delete?",parent=self.root)
-                    if op==True:
-                        # Log the activity before deletion
-                        ActivityLogger.log_activity(
-                            activity=f"Deleted product: {prod_data[0]}",
-                            user_id=self.current_user_id,
-                            module="products",
-                            details={
-                                "pid": self.var_pid.get(),
-                                "name": prod_data[0],
-                                "category": prod_data[1],
-                                "supplier": prod_data[2],
-                                "price": prod_data[3],
-                                "quantity": prod_data[4]
-                            }
-                        )
-                        
-                        cur.execute("delete from product where pid=?",(self.var_pid.get(),))
-                        con.commit()
-                        messagebox.showinfo("Delete","Product Deleted Successfully",parent=self.root)
-                        self.clear()
-        except Exception as ex:
-            messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
-
-            '''cur.execute("Select * from product where pid=?",(self.var_pid.get(),))
+                cur.execute("Select * from product where pid=?",(self.var_pid.get(),))
                 row=cur.fetchone()
                 if row== None:
                     messagebox.showerror("Error","Invalid ",parent=self.root)
@@ -309,7 +240,7 @@ class productClass:
                         messagebox.showinfo("Delete","Product Deleted Successfully",parent=self.root)
                         self.clear()
         except Exception as ex:
-            messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)'''
+            messagebox.showerror("Error",f"Error due to :{str(ex)}",parent=self.root)
 
 ################## Clear
     def clear(self):
