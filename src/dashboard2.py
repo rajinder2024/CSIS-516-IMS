@@ -42,11 +42,7 @@ class IMS:
 
        
 
-        #======title========
-        #img_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images', 'logo1.png')
-        
-
-        #PhotoImage(file=os.path.join(BASE_IMAGE_PATH, 'logo1.png'))
+        #======title========    
 
 
         title = Label(

@@ -9,6 +9,8 @@ from employee import employeeClass
 from supplier import supplierClass
 from category import categoryClass
 from product import productClass
+from stock_report import StockReportClass
+from sales_report import SalesReportClass
 from sales import salesClass
 from sales_forecast import SalesForecastClass 
 import subprocess
@@ -40,11 +42,7 @@ class IMS:
 
        
 
-        #======title========
-        #img_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'images', 'logo1.png')
-        
-
-        #PhotoImage(file=os.path.join(BASE_IMAGE_PATH, 'logo1.png'))
+        #======title========    
 
 
         title = Label(
@@ -57,14 +55,9 @@ class IMS:
         title.place(x=0, y=0, relwidth=1, height=70)
 
         #===========button_logout=========
-        btn_logout= Button(self.root,text="Logout",command=self.logout,font=("times new roman",15,"bold"),
-                           bg="red", cursor="hand2").place(x=1150,y=10,height=50, width =150)
+        btn_logout= Button(self.root,text="Logout",command=self.logout,font=("times new roman",15,"bold"),bg="red", cursor="hand2").place(x=1150,y=10,height=50, width =150)
         #========Label_clock=============
-        self.lbl_clock = Label(
-            self.root,
-            text="Welcome to Inventory Management System\t\t Date: MM:HH:YYYY\t\t Time: HH:MM:SS", 
-            font=("times new roman", 15), bg="#010c48",
-            fg="white",)
+        self.lbl_clock = Label( self.root,text="Welcome to Inventory Management System\t\t Date: MM:HH:YYYY\t\t Time: HH:MM:SS", font=("times new roman", 15), bg="#010c48",fg="white",)
         self.lbl_clock.place(x=0, y=70, relwidth=1, height=30)
 
         #======Left_Menu=================
@@ -105,33 +98,85 @@ class IMS:
 
         self.lbl_employee =Label(self.root,text="Total Employee\n[0]",bd=5, relief= RIDGE,bg="#33bbf9",fg="white", 
                                  font=("goudy old style",20,"bold"))
-        self.lbl_employee.place(x=300,y=120,height=150,width=300)
+        self.lbl_employee.place(x=230,y=120,height=150,width=270)
 
          # Supplier Label
         self.lbl_supplier = Label(self.root, text="Total Supplier\n[0]", bd=5, relief=RIDGE, bg="#ff5722", fg="white",
                                   font=("goudy old style", 20, "bold"))
-        self.lbl_supplier.place(x=650, y=120, height=150, width=300)
+        self.lbl_supplier.place(x=540, y=120, height=150, width=270)
 
         # Category Label
         self.lbl_category = Label(self.root, text="Total Category\n[0]", bd=5, relief=RIDGE, bg="#009688", fg="white",
                                   font=("goudy old style", 20, "bold"))
-        self.lbl_category.place(x=1000, y=120, height=150, width=300)
+        self.lbl_category.place(x=850, y=120, height=150, width=270)
 
         # Product Label
         self.lbl_product = Label(self.root, text="Total Product\n[0]", bd=5, relief=RIDGE, bg="#607d8b", fg="white",
                                  font=("goudy old style", 20, "bold"))
-        self.lbl_product.place(x=300, y=300, height=150, width=300)
+        self.lbl_product.place(x=230, y=300, height=150, width=270)
 
         # Sales Label
         self.lbl_sales = Label(self.root, text="Total Sales\n[0]", bd=5, relief=RIDGE, bg="#3f51b5", fg="white",
                                font=("goudy old style", 20, "bold"))
-        self.lbl_sales.place(x=650, y=300, height=150, width=300)
-        # Sales _forcast
-        btn_forecast = Button(self.root, text="Sales Forecast", command=self.forecast,
-                      font=("times new roman", 16, "bold"), bg="green", fg="white", cursor="hand2")
-        btn_forecast.place(x=550, y=630, width=250, height=40)
+        self.lbl_sales.place(x=540, y=300, height=150, width=270)
 
+        #### Right frmae
+        # Load the top right logo for the right menu
+    
+        reportLogo_path= os.path.join(IMG_DIR,"report.png")
+        self.ReportLogo = Image.open(reportLogo_path)
+        self.ReportLogo = self.ReportLogo.resize((200, 200), Image.Resampling.LANCZOS)
+        self.ReportLogo = ImageTk.PhotoImage(self.ReportLogo)
 
+        # Load and resize the icons
+        self.icon_sales = Image.open("C:/Users/Rajinder/CSIS_Project/IMS/images/sales_icon.png")
+        self.icon_sales = self.icon_sales.resize((25, 25), Image.Resampling.LANCZOS)
+        self.icon_sales = ImageTk.PhotoImage(self.icon_sales)
+
+        self.icon_stock = Image.open("C:/Users/Rajinder/CSIS_Project/IMS/images/stock_icon.png")
+        self.icon_stock = self.icon_stock.resize((25, 25), Image.Resampling.LANCZOS)
+        self.icon_stock = ImageTk.PhotoImage(self.icon_stock)
+
+        self.icon_activity = Image.open("C:/Users/Rajinder/CSIS_Project/IMS/images/activity_icon.png")
+        self.icon_activity = self.icon_activity.resize((25, 25), Image.Resampling.LANCZOS)
+        self.icon_activity = ImageTk.PhotoImage(self.icon_activity)
+
+        RightMenu = Frame(self.root, bd=3, relief=GROOVE, bg="white",highlightthickness=1)
+        RightMenu.place(x=1150, y=102, width=200, height=565)
+
+        # Add logo to Right Menu
+        lbl_rightlogo = Label(RightMenu, image=self.ReportLogo, bg="white")
+        lbl_rightlogo.pack(side=TOP, fill=X)
+
+        # Right Menu Title
+        lbl_rightmenu = Label(
+            RightMenu, text="Reports", font=("times new roman", 20),
+             fg="black", pady=7
+        )
+        lbl_rightmenu.pack(side=TOP, fill=X)
+
+        # Sales Report Button
+        btn_report = Button(
+            RightMenu, text="Sales Report", command=self.sales_report,
+            image=self.icon_sales, compound=LEFT, anchor="w",
+            font=("times new roman", 20), bg="white", bd=3, cursor="hand2", padx=10
+        )
+        btn_report.pack(side=TOP, fill=X, pady=5)
+
+        # Stock Report Button
+        btn_stock_report = Button(RightMenu, text="Stock Report", command=self.stock_report,
+            image=self.icon_stock, compound=LEFT, anchor="w",
+            font=("times new roman", 20), bg="white", bd=3, cursor="hand2", padx=10
+        )
+        btn_stock_report.pack(side=TOP, fill=X, pady=5)
+
+        # Forecast Button
+        btn_sales_predict= Button(
+            RightMenu, text="Sales Forecast", command=self.forecast,
+            image=self.icon_activity, compound=LEFT, anchor="w",
+            font=("times new roman", 20), bg="white", bd=3, cursor="hand2", padx=10
+        )
+        btn_sales_predict.pack(side=TOP, fill=X, pady=5)
 
 
 
@@ -168,16 +213,20 @@ class IMS:
         self.new_obj = salesClass(self.new_win)
 
 ############### Sales Forecast
+    def sales_report(self):
+        self.new_win = Toplevel(self.root)
+        self.new_obj = SalesReportClass(self.new_win)
+        
+
+    def stock_report(self):
+        self.new_win = Toplevel(self.root)
+        self.new_obj = StockReportClass(self.new_win)
+        
+
     def forecast(self):
         self.new_win = Toplevel(self.root)
         self.new_obj = SalesForecastClass(self.new_win)
-
-    def run_sales_forecast(self):
-        try:
-            subprocess.Popen(["python", "sales_forecast.py"])
-        except Exception as ex:
-            messagebox.showerror("Error", f"Could not run forecast:\n{str(ex)}", parent=self.root)
-
+        
 
 
     def update_content(self):

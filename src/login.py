@@ -48,63 +48,40 @@ class Login_System:
 
     ###################### Login ######################
     def login(self):
-        con = sqlite3.connect(database=r'ims.db')
-        cur = con.cursor()
         try:
+            con = sqlite3.connect(database=r'ims.db')
+            con.row_factory = sqlite3.Row
+            cur = con.cursor()
+
             if self.employee_id.get() == "" or self.password.get() == "":
                 messagebox.showerror('Error', "All fields are required", parent=self.root)
             else:
-                cur.execute("SELECT utype FROM employee WHERE eid=? AND pass=?", 
+                cur.execute("SELECT * FROM employee WHERE eid=? AND pass=?", 
                             (self.employee_id.get(), self.password.get()))
                 user = cur.fetchone()
+                print(">>> USER FETCHED:", user)
 
                 if user is None:
                     messagebox.showerror('Error', "Invalid Username/Password", parent=self.root)
                 else:
-                    self.root.destroy()
-                    if user[0] == "Admin":
-                        self.launch_dashboard()
+                    role = user["utype"].lower()        
+                    print(">>> ROLE:", role)
+
+                    if role == "admin":
+                        self.root.destroy()
+                        os.system("python src/dashboard.py")
+                    elif role == "employee":
+                        self.root.destroy()
+                        os.system("python src/billing.py")
                     else:
-                        self.launch_billing()
+                        messagebox.showerror("Error", "Unknown role type", parent=self.root)
+
         except Exception as ex:
             messagebox.showerror("Error", f"Error due to: {str(ex)}", parent=self.root)
         finally:
             con.close()
 
-    ###################### Launch Dashboard ######################
-    def launch_dashboard(self):
-        try:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            dashboard_path = os.path.join(current_dir, "dashboard.py")
-
-            print("\n=== LOGIN.PY DEBUG ===")
-            print(f"Working directory: {os.getcwd()}")
-            print(f"Script location: {os.path.abspath(__file__)}")
-            print("====================\n")
-
-            subprocess.Popen(
-                [sys.executable, dashboard_path],
-                cwd=current_dir,
-                #creationflags=subprocess.CREATE_NO_WINDOW
-            )
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to launch dashboard: {str(e)}")
-            sys.exit(1)
-
-    ###################### Launch Billing ######################
-    def launch_billing(self):
-        try:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            billing_path = os.path.join(current_dir, "billing.py")
-
-            subprocess.Popen(
-                [sys.executable, billing_path],
-                cwd=current_dir,
-                #creationflags=subprocess.CREATE_NO_WINDOW
-            )
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to launch billing: {str(e)}")
-            sys.exit(1)
+   
 
     ###################### Forget Password ######################
     def forget_window(self):
