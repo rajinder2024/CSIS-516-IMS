@@ -461,7 +461,7 @@ class BillClass:
                 
                 con.commit()
                 
-                # Save bill to file (keep your existing code)
+                # Save bill to file 
                 fp = open(f'bill/{str(self.invoice)}.txt', 'w')
                 fp.write(self.txt_bill_area.get('1.0',END))
                 fp.close()
@@ -593,7 +593,7 @@ Bill No.{str(self.invoice)}\t\t\t Date: {str(time.strftime("%m/%d/%Y"))}
     def logout(self):
     # Close current window and re-open the login screen
         self.root.destroy()
-        subprocess.Popen(["python", "Source Code/login.py"])
+        subprocess.Popen(["python", "src/login.py"])
 
 
 
