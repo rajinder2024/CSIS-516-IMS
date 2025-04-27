@@ -45,6 +45,7 @@ o scikit-learn (for basic sales forecasting)
 
 5. Run the Application
    Run the main file (example:login.py).
+    C:\Python\python.exe .\login.py
 
 Note: Make sure the database file ims.db is always present in the correct path.
    
