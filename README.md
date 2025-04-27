@@ -43,10 +43,15 @@ o scikit-learn (for basic sales forecasting)
 4.Navigate to the Project Folder
   Go inside the src/ directory.
 
-5. Run the Application:
+5. Run the application:
    Run the main file (example:login.py):  C:\Python\python.exe .\login.py
 
+
+Ready to Use! 🎉
+The system will connect to ims.db and start your Inventory Management System.
 Note: Make sure the database file ims.db is always present in the correct path.
+
+######### Vedio Link: https://vimeo.com/1079043278?share=copy#t=0
    
 
 
