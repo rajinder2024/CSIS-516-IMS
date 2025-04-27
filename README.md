@@ -44,7 +44,7 @@ o scikit-learn (for basic sales forecasting)
   Go inside the src/ directory.
 
 5. Run the application:
-   Run the main file (example:login.py):  C:\Python\python.exe .\login.py
+   Run the main file :  C:\Python\python.exe .\login.py
 
 
 Ready to Use! 🎉
